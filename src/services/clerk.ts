@@ -23,6 +23,9 @@ export async function getCurrentUser({ allData = false } = {}) {
         clerkUserId: userId,
         userId: sessionClaims?.dbId,
         role: sessionClaims?.role,
+        user: allData && sessionClaims?.dbId != null
+            ? await getUser(sessionClaims.dbId)
+            : undefined,
         redirectToSignIn,
     }
 }
@@ -37,5 +40,14 @@ export function syncClerkUserMetadata(user: {
             dbId: user.id,
             role: user.role,
         },
+    })
+}
+
+async function getUser(id: string) {
+    "use cache"
+    cacheTag(getUserIdTag(id))
+
+    return db.query.UserTable.findFirst({
+        where: eq(UserTable.id, id)
     })
 }
