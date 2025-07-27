@@ -1,0 +1,41 @@
+import {UserRole, UserTable} from "@/drizzle/schema/user";
+import { auth, clerkClient } from "@clerk/nextjs/server"
+import {redirect} from "next/navigation";
+import {cacheTag} from "next/dist/server/use-cache/cache-tag";
+import {getUserIdTag} from "@/features/users/db/cache";
+import {db} from "@/drizzle/db";
+import {eq} from "drizzle-orm";
+
+const client = await clerkClient()
+
+export async function getCurrentUser({ allData = false } = {}) {
+    const { userId, sessionClaims, redirectToSignIn } = await auth()
+
+    console.log(sessionClaims?.role)
+    /*
+    if (userId != null && sessionClaims.dbId == null) {
+        redirect("/api/clerk/syncUsers")
+    }
+
+     */
+
+    return {
+        clerkUserId: userId,
+        userId: sessionClaims?.dbId,
+        role: sessionClaims?.role,
+        redirectToSignIn,
+    }
+}
+
+export function syncClerkUserMetadata(user: {
+    id: string
+    clerkUserId: string
+    role: UserRole
+}) {
+    return client.users.updateUserMetadata(user.clerkUserId, {
+        publicMetadata: {
+            dbId: user.id,
+            role: user.role,
+        },
+    })
+}
