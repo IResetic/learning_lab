@@ -12,6 +12,7 @@ import {
   handleCommandNavigation,
   StarterKit,
   Placeholder,
+  TiptapImage,
 } from "novel";
 import { useState } from "react";
 import { slashCommand, suggestionItems } from "./slash-command";
@@ -41,10 +42,27 @@ export default function NewArticlesPage() {
                 keepAttributes: false,
             },
         }),
+        TiptapImage.configure({
+            inline: false,
+            allowBase64: true,
+        }),
         Placeholder.configure({
-            placeholder: "Type '/' for commands...",
+            placeholder: ({ node, pos, hasAnchor, editor }) => {
+                // Only show placeholder for the first paragraph when the entire document is empty
+                if (pos === 1 && node.type.name === 'paragraph' && node.content.size === 0) {
+                    const doc = editor?.state.doc;
+                    if (doc) {
+                        // Check if the document only has one empty paragraph
+                        const hasContent = doc.content.size > 2; // More than just one empty paragraph
+                        if (!hasContent) {
+                            return "Type '/' for commands...";
+                        }
+                    }
+                }
+                return '';
+            },
             showOnlyWhenEditable: true,
-            showOnlyCurrent: false,
+            showOnlyCurrent: true,
             includeChildren: false,
         }),
         slashCommand

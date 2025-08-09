@@ -212,6 +212,11 @@
   height: 0;
 }
 
+/* Hide placeholder on all non-first paragraphs */
+.ProseMirror p:not(:first-child).is-empty::before {
+  display: none !important;
+}
+
 /* Hide placeholder text in list items */
 .ProseMirror ul li.is-empty::before,
 .ProseMirror ol li.is-empty::before,
@@ -225,4 +230,13 @@
 .ProseMirror ol .is-empty::before {
   content: none !important;
   display: none !important;
+}
+
+/* Image styling */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  display: block;
 }

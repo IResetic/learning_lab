@@ -64,6 +64,44 @@ export const suggestionItems = createSuggestionItems([
         .run();
     },
   },
+  {
+    title: "Image",
+    description: "Upload an image from your computer.",
+    searchTerms: ["photo", "picture", "media"],
+    icon: <div className="flex h-10 w-10 items-center justify-center rounded-sm border bg-background">
+      <div className="text-sm">🖼️</div>
+    </div>,
+    command: ({ editor, range }) => {
+      console.log("Image command triggered", { editor, range });
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .run();
+      
+      // Create file input for image upload
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const src = e.target?.result as string;
+            editor
+              .chain()
+              .focus()
+              .setImage({ src })
+              .createParagraphNear()
+              .run();
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    },
+  },
 ]);
 
 export const slashCommand = Command.configure({
