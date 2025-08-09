@@ -14,8 +14,9 @@ import {
   Placeholder,
   TiptapImage,
 } from "novel";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { slashCommand, suggestionItems } from "./slash-command";
+import { Editor } from "@tiptap/react";
 
 export default function NewArticlesPage() {
     const [content, setContent] = useState<JSONContent>({
@@ -27,6 +28,45 @@ export default function NewArticlesPage() {
             },
         ],
     });
+    const editorRef = useRef<Editor | null>(null);
+
+    // Simple drag and drop handlers
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        const files = Array.from(e.dataTransfer.files);
+        const imageFile = files.find(file => file.type.startsWith('image/'));
+        
+        if (imageFile && editorRef.current) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const src = event.target?.result as string;
+                editorRef.current?.chain().focus().setImage({ src }).createParagraphNear().run();
+            };
+            reader.readAsDataURL(imageFile);
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent) => {
+        const items = Array.from(e.clipboardData.items);
+        const imageItem = items.find(item => item.type.startsWith('image/'));
+        
+        if (imageItem && editorRef.current) {
+            const file = imageItem.getAsFile();
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const src = event.target?.result as string;
+                    editorRef.current?.chain().focus().setImage({ src }).createParagraphNear().run();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    };
 
     const extensions = [
         StarterKit.configure({
@@ -45,25 +85,18 @@ export default function NewArticlesPage() {
         TiptapImage.configure({
             inline: false,
             allowBase64: true,
-        }),
-        Placeholder.configure({
-            placeholder: ({ node, pos, hasAnchor, editor }) => {
-                // Only show placeholder for the first paragraph when the entire document is empty
-                if (pos === 1 && node.type.name === 'paragraph' && node.content.size === 0) {
-                    const doc = editor?.state.doc;
-                    if (doc) {
-                        // Check if the document only has one empty paragraph
-                        const hasContent = doc.content.size > 2; // More than just one empty paragraph
-                        if (!hasContent) {
-                            return "Type '/' for commands...";
-                        }
-                    }
-                }
-                return '';
+            HTMLAttributes: {
+                class: "rounded-lg border border-muted",
             },
+        }),
+        // UploadImagesPlugin({
+        //     imageClass: "opacity-40 rounded-lg border border-muted",
+        // }),
+        Placeholder.configure({
+            placeholder: "Type '/' for commands...",
             showOnlyWhenEditable: true,
-            showOnlyCurrent: true,
-            includeChildren: false,
+            showOnlyCurrent: false,
+            includeChildren: true,
         }),
         slashCommand
     ];
@@ -74,7 +107,23 @@ export default function NewArticlesPage() {
                 <PageHeader title="New Articles" />
             </div>
             <div className="w-full max-w-screen-lg mx-auto px-4">
-                <div className="min-h-[500px] border rounded-lg overflow-hidden">
+                <div 
+                    className="min-h-[500px] border rounded-lg overflow-hidden cursor-text"
+                    onClick={(e) => {
+                        // If clicking on empty space, focus the editor at the beginning
+                        const target = e.target as HTMLElement;
+                        if (target.classList.contains('ProseMirror') || target.closest('.ProseMirror')) {
+                            return; // Let ProseMirror handle clicks within content
+                        }
+                        // Focus at the beginning of the document using TipTap commands
+                        if (editorRef.current) {
+                            editorRef.current.chain().focus().setTextSelection(0).run();
+                        }
+                    }}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onPaste={handlePaste}
+                >
                     <EditorRoot>
                         <EditorContent
                             className="min-h-[500px] w-full p-4 prose prose-lg dark:prose-invert max-w-full focus:outline-none"
@@ -84,9 +133,14 @@ export default function NewArticlesPage() {
                                 handleDOMEvents: {
                                     keydown: (_view, event) => handleCommandNavigation(event),
                                 },
+                                // handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
+                                // handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
                                 attributes: {
                                     class: "prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
                                 },
+                            }}
+                            onCreate={({ editor }) => {
+                                editorRef.current = editor;
                             }}
                             onUpdate={({ editor }) => {
                                 const json = editor.getJSON();

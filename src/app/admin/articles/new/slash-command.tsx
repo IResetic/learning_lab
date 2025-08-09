@@ -72,7 +72,6 @@ export const suggestionItems = createSuggestionItems([
       <div className="text-sm">🖼️</div>
     </div>,
     command: ({ editor, range }) => {
-      console.log("Image command triggered", { editor, range });
       editor
         .chain()
         .focus()
@@ -86,6 +85,17 @@ export const suggestionItems = createSuggestionItems([
       input.onchange = (event) => {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (file) {
+          // Validate file
+          if (!file.type.includes('image/')) {
+            alert('Please select an image file');
+            return;
+          }
+          if (file.size / 1024 / 1024 > 20) {
+            alert('Image size should be less than 20MB');
+            return;
+          }
+          
+          // Use the same upload function as drag & drop
           const reader = new FileReader();
           reader.onload = (e) => {
             const src = e.target?.result as string;

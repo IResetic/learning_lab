@@ -208,12 +208,24 @@
   content: attr(data-placeholder);
   float: left;
   color: hsl(var(--muted-foreground));
+  opacity: 0.5;
   pointer-events: none;
   height: 0;
 }
 
-/* Hide placeholder on all non-first paragraphs */
+/* Only show placeholder on first paragraph when document is empty */
+.ProseMirror p:first-child.is-empty::before {
+  display: block;
+}
+
+/* Hide placeholder on all other paragraphs */
 .ProseMirror p:not(:first-child).is-empty::before {
+  display: none !important;
+}
+
+/* Hide placeholder when document has content */
+.ProseMirror:not(:only-child) .is-empty::before,
+.ProseMirror p:not(:only-child).is-empty::before {
   display: none !important;
 }
 
@@ -239,4 +251,36 @@
   border-radius: 0.5rem;
   margin: 1rem 0;
   display: block;
+}
+
+/* Image upload states */
+.img-placeholder {
+  position: relative;
+  display: inline-block;
+  margin: 1rem 0;
+}
+
+.img-placeholder::after {
+  content: "Uploading...";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.img-placeholder img {
+  opacity: 0.4;
+  filter: blur(2px);
+}
+
+/* Drag & drop styling */
+.ProseMirror.drag-over {
+  background-color: hsl(var(--muted));
+  border: 2px dashed hsl(var(--border));
 }
