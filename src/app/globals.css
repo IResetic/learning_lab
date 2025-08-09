@@ -84,3 +84,86 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Novel.sh Editor Styles */
+.ProseMirror {
+  position: relative;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0; /* the above doesn't seem to work in Edge */
+}
+
+.ProseMirror p {
+  margin: 0.75rem 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  margin: 1.5rem 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.ProseMirror h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.ProseMirror blockquote {
+  padding-left: 1rem;
+  border-left: 4px solid hsl(var(--muted));
+  margin: 1rem 0;
+  font-style: italic;
+}
+
+.ProseMirror code {
+  background: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.ProseMirror pre {
+  background: hsl(var(--muted));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+}

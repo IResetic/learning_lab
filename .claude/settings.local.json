@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:novel.sh)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ],
+    "deny": []
+  }
+}
