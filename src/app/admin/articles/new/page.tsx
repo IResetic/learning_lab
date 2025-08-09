@@ -75,7 +75,7 @@ export default function NewArticlesPage() {
     const extensions = [
         StarterKit.configure({
             heading: {
-                levels: [1, 2, 3]
+                levels: [1, 2, 3, 4]
             },
             bulletList: {
                 keepMarks: true,
@@ -209,7 +209,7 @@ export default function NewArticlesPage() {
                                         <EditorCommandItem
                                             value={item.title}
                                             onCommand={item.command}
-                                            className="flex w-full items-center space-x-2 rounded-sm px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent"
+                                            className="flex w-full items-center space-x-2 rounded-sm px-2 py-1 text-left text-sm hover:bg-slate-100 aria-selected:bg-slate-200 aria-selected:text-slate-900 data-[selected=true]:bg-slate-200 data-[selected=true]:text-slate-900"
                                             key={item.title}
                                         >
                                             <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-muted bg-background">

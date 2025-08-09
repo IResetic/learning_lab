@@ -48,6 +48,38 @@ export const suggestionItems = createSuggestionItems([
     },
   },
   {
+    title: "Heading 3",
+    description: "Small section heading.",
+    searchTerms: ["subtitle", "small"],
+    icon: <div className="flex h-10 w-10 items-center justify-center rounded-sm border bg-background">
+      <p className="text-sm font-medium">H3</p>
+    </div>,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setNode("heading", { level: 3 })
+        .run();
+    },
+  },
+  {
+    title: "Heading 4",
+    description: "Extra small section heading.",
+    searchTerms: ["subtitle", "extra small"],
+    icon: <div className="flex h-10 w-10 items-center justify-center rounded-sm border bg-background">
+      <p className="text-xs font-normal">H4</p>
+    </div>,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setNode("heading", { level: 4 })
+        .run();
+    },
+  },
+  {
     title: "Bullet List",
     description: "Create a simple bullet list.",
     searchTerms: ["list", "unordered", "bullets"],

@@ -123,6 +123,11 @@
   line-height: 2rem;
 }
 
+.ProseMirror h4 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
 .ProseMirror blockquote {
   padding-left: 1rem;
   border-left: 4px solid hsl(var(--muted));
@@ -293,3 +298,4 @@
 .ProseMirror em {
   font-style: italic;
 }
+
