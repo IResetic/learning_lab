@@ -156,8 +156,52 @@
   margin: 0.75rem 0;
 }
 
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
 .ProseMirror li {
-  margin: 0.25rem 0;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+  display: list-item;
+}
+
+.ProseMirror ul li {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+/* Ensure bullets show even with prose class */
+.prose .ProseMirror ul {
+  list-style-type: disc;
+  margin: 0.5rem 0 !important;
+}
+
+.prose .ProseMirror ul li {
+  list-style-type: disc;
+  display: list-item;
+  list-style-position: outside;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.prose .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.prose .ProseMirror ol li {
+  list-style-type: decimal;
+  display: list-item;
+  list-style-position: outside;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
 }
 
 .ProseMirror .is-empty::before {
@@ -166,4 +210,19 @@
   color: hsl(var(--muted-foreground));
   pointer-events: none;
   height: 0;
+}
+
+/* Hide placeholder text in list items */
+.ProseMirror ul li.is-empty::before,
+.ProseMirror ol li.is-empty::before,
+.ProseMirror ul li p.is-empty::before,
+.ProseMirror ol li p.is-empty::before {
+  display: none !important;
+}
+
+/* More specific targeting for placeholder in lists */
+.ProseMirror ul .is-empty::before,
+.ProseMirror ol .is-empty::before {
+  content: none !important;
+  display: none !important;
 }

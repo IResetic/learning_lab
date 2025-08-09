@@ -31,10 +31,21 @@ export default function NewArticlesPage() {
         StarterKit.configure({
             heading: {
                 levels: [1, 2, 3]
-            }
+            },
+            bulletList: {
+                keepMarks: true,
+                keepAttributes: false,
+            },
+            orderedList: {
+                keepMarks: true,
+                keepAttributes: false,
+            },
         }),
         Placeholder.configure({
-            placeholder: "Type '/' for commands..."
+            placeholder: "Type '/' for commands...",
+            showOnlyWhenEditable: true,
+            showOnlyCurrent: false,
+            includeChildren: false,
         }),
         slashCommand
     ];
@@ -72,7 +83,7 @@ export default function NewArticlesPage() {
                                     {suggestionItems.map((item) => (
                                         <EditorCommandItem
                                             value={item.title}
-                                            onCommand={(val) => item.command && item.command(val)}
+                                            onCommand={item.command}
                                             className="flex w-full items-center space-x-2 rounded-sm px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent"
                                             key={item.title}
                                         >

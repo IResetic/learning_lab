@@ -47,6 +47,23 @@ export const suggestionItems = createSuggestionItems([
         .run();
     },
   },
+  {
+    title: "Bullet List",
+    description: "Create a simple bullet list.",
+    searchTerms: ["list", "unordered", "bullets"],
+    icon: <div className="flex h-10 w-10 items-center justify-center rounded-sm border bg-background">
+      <div className="text-sm">• •</div>
+    </div>,
+    command: ({ editor, range }) => {
+      console.log("Bullet List command triggered", { editor, range });
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .toggleBulletList()
+        .run();
+    },
+  },
 ]);
 
 export const slashCommand = Command.configure({
