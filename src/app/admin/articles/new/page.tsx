@@ -20,6 +20,10 @@ import { useState, useRef } from "react";
 import { slashCommand, suggestionItems } from "./slash-command";
 import { Editor } from "@tiptap/react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { saveArticle } from "./actions";
 
 export default function NewArticlesPage() {
     const [content, setContent] = useState<JSONContent>({
@@ -33,6 +37,27 @@ export default function NewArticlesPage() {
     });
     const editorRef = useRef<Editor | null>(null);
     const [, forceUpdate] = useState({});
+    const [title, setTitle] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async () => {
+        if (!title.trim()) {
+            alert("Please enter a title");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const article = await saveArticle(title, content);
+            alert("Article saved successfully!");
+            console.log("Saved article:", article);
+        } catch (error) {
+            console.error("Failed to save article:", error);
+            alert("Failed to save article. Please try again.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     // Simple drag and drop handlers
     const handleDragOver = (e: React.DragEvent) => {
@@ -111,6 +136,42 @@ export default function NewArticlesPage() {
                 <PageHeader title="New Articles" />
             </div>
             <div className="w-full max-w-screen-lg mx-auto px-4">
+                {/* Title Input */}
+                <div className="mb-6">
+                    <Label htmlFor="title" className="text-base font-medium">
+                        Article Title
+                    </Label>
+                    <Input
+                        id="title"
+                        type="text"
+                        placeholder="Enter your article title..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="mt-2 text-lg"
+                        disabled={isSaving}
+                    />
+                </div>
+
+                {/* Save Buttons */}
+                <div className="flex gap-3 mb-6">
+                    <Button 
+                        variant="outline"
+                        onClick={handleSave}
+                        disabled={isSaving || !title.trim()}
+                    >
+                        {isSaving ? "Saving..." : "Save"}
+                    </Button>
+                    <Button 
+                        onClick={() => {
+                            // TODO: Implement publish functionality
+                            console.log("Publish clicked");
+                        }}
+                        className="bg-primary hover:bg-primary/90"
+                    >
+                        Publish
+                    </Button>
+                </div>
+
                 <div 
                     className="min-h-[500px] border rounded-lg overflow-hidden cursor-text"
                     onClick={(e) => {
