@@ -85,6 +85,13 @@
   }
 }
 
+/* Custom container to match your layout */
+@layer components {
+  .container {
+    @apply w-full max-w-screen-lg mx-auto px-4;
+  }
+}
+
 /* Novel.sh Editor Styles */
 .ProseMirror {
   position: relative;

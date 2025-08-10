@@ -135,7 +135,7 @@ export default function NewArticlesPage() {
             <div className="container my-6">
                 <PageHeader title="New Articles" />
             </div>
-            <div className="w-full max-w-screen-lg mx-auto px-4">
+            <div className="container">
                 {/* Title Input */}
                 <div className="mb-6">
                     <Label htmlFor="title" className="text-base font-medium">
