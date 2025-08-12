@@ -29,11 +29,6 @@ export default function ArticlesPage() {
                     <p className="mt-2 text-sm text-muted-foreground">
                         Get started by creating your first article.
                     </p>
-                    <Button asChild className="mt-4">
-                        <Link href="/admin/articles/new">
-                            Create Article
-                        </Link>
-                    </Button>
                 </div>
             </div>
         </div>
