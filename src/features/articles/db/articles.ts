@@ -1,6 +1,6 @@
 import { ArticleTable } from "@/drizzle/schema/article";
 import { db } from "@/drizzle/db";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, desc, count } from "drizzle-orm";
 import { revalidateArticleCache } from "@/features/articles/db/cache";
 
 export async function insertArticle(data: typeof ArticleTable.$inferInsert) {
@@ -108,4 +108,66 @@ export async function unpublishArticle({ id }: { id: string }) {
         status: "draft",
         publishedAt: null
     })
+}
+
+export type GetArticlesOptions = {
+    page?: number;
+    limit?: number;
+    status?: "draft" | "published";
+}
+
+export type PaginatedArticles = {
+    articles: (typeof ArticleTable.$inferSelect)[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}
+
+export async function getArticles(options: GetArticlesOptions = {}): Promise<PaginatedArticles> {
+    const { page = 1, limit = 12, status } = options;
+    const offset = (page - 1) * limit;
+
+    // Build base query conditions
+    const conditions = [isNull(ArticleTable.deletedAt)];
+    if (status) {
+        conditions.push(eq(ArticleTable.status, status));
+    }
+
+    // Get total count for pagination
+    const [{ total }] = await db
+        .select({ total: count() })
+        .from(ArticleTable)
+        .where(and(...conditions));
+
+    // Get articles with pagination
+    const articles = await db
+        .select()
+        .from(ArticleTable)
+        .where(and(...conditions))
+        .orderBy(desc(ArticleTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        articles,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1,
+        }
+    };
+}
+
+export async function getPublishedArticles(options: Omit<GetArticlesOptions, 'status'> = {}): Promise<PaginatedArticles> {
+    return getArticles({ ...options, status: "published" });
 }

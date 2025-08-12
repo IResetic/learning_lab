@@ -10,23 +10,20 @@ import { canAccessAdminPages } from "@/permissons/general";
 
 export async function saveArticle(title: string, content: JSONContent) {
     // Get current user with role information
-    const user = await getCurrentUser({ allData: true });
+    const currentUser = await getCurrentUser({ allData: true });
     
-    if (!user) {
+    if (!currentUser || !currentUser.user) {
         return { error: "You must be logged in to save articles" };
     }
 
     // Check admin permissions
-    if (!canAccessAdminPages({ role: user.role })) {
+    if (!canAccessAdminPages({ role: currentUser.role })) {
         return { error: "You do not have permission to save articles" };
     }
 
     if (!title.trim()) {
         return { error: "Title is required" };
     }
-
-    // User is already retrieved above with role information
-    // Use the user from getCurrentUser which has the database record
 
     // Generate slug from title
     const slug = title
@@ -42,7 +39,7 @@ export async function saveArticle(title: string, content: JSONContent) {
             slug,
             content,
             status: "draft",
-            authorId: user.id, // Use the database user's UUID, not Clerk ID
+            authorId: currentUser.user.id, // Use the database user's UUID
         });
 
         return { success: true, article };
