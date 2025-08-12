@@ -48,9 +48,14 @@ export default function NewArticlesPage() {
 
         setIsSaving(true);
         try {
-            const article = await saveArticle(title, content);
-            alert("Article saved successfully!");
-            console.log("Saved article:", article);
+            const result = await saveArticle(title, content);
+            
+            if (result.error) {
+                alert(result.error);
+            } else {
+                alert("Article saved successfully!");
+                console.log("Saved article:", result.article);
+            }
         } catch (error) {
             console.error("Failed to save article:", error);
             alert("Failed to save article. Please try again.");

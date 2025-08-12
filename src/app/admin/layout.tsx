@@ -25,7 +25,7 @@ function Navbar() {
                 <Badge>Admin</Badge>
             </div>
             <Link
-                className="hoover:bg-accent/10 flex items-center"
+                className="hover:bg-accent/10 flex items-center px-2 rounded-sm"
                 href="/admin/articles">
                 Articles
             </Link>

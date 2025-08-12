@@ -25,12 +25,6 @@ function Navbar() {
             <Suspense>
                 <SignedIn>
                      <AdminLink />
-                    <Link
-                        className="hoover:bg-accent/10 flex items-center"
-                        href="/admin/articles">
-                        Articles
-                    </Link>
-
                     <div className="size-8 self-center">
                         <UserButton appearance={{
                             elements: {
@@ -54,7 +48,6 @@ function Navbar() {
 async function AdminLink() {
     const user = await getCurrentUser({allData: true})
 
-    console.log(canAccessAdminPages(user))
     if (!canAccessAdminPages(user)) return null
 
     return (

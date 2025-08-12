@@ -1,44 +1,32 @@
 "use server";
 
 import { insertArticle } from "@/features/articles/db/articles";
-import { auth } from "@clerk/nextjs/server";
 import { JSONContent } from "novel";
 import { db } from "@/drizzle/db";
 import { UserTable } from "@/drizzle/schema/user";
 import { eq } from "drizzle-orm";
+import { getCurrentUser } from "@/services/clerk";
+import { canAccessAdminPages } from "@/permissons/general";
 
 export async function saveArticle(title: string, content: JSONContent) {
-    const { userId } = await auth();
+    // Get current user with role information
+    const user = await getCurrentUser({ allData: true });
     
-    if (!userId) {
-        throw new Error("You must be logged in to save articles");
+    if (!user) {
+        return { error: "You must be logged in to save articles" };
+    }
+
+    // Check admin permissions
+    if (!canAccessAdminPages({ role: user.role })) {
+        return { error: "You do not have permission to save articles" };
     }
 
     if (!title.trim()) {
-        throw new Error("Title is required");
+        return { error: "Title is required" };
     }
 
-    // Find the database user by Clerk ID, or create if doesn't exist
-    let [user] = await db
-        .select()
-        .from(UserTable)
-        .where(eq(UserTable.clerkUserId, userId));
-
-    if (!user) {
-        // User doesn't exist in database yet, create them
-        // This can happen if webhook hasn't fired yet or failed
-        const [newUser] = await db
-            .insert(UserTable)
-            .values({
-                clerkUserId: userId,
-                email: "unknown@example.com", // Placeholder - will be updated by webhook
-                name: "User", // Placeholder - will be updated by webhook
-                role: "user",
-            })
-            .returning();
-        
-        user = newUser;
-    }
+    // User is already retrieved above with role information
+    // Use the user from getCurrentUser which has the database record
 
     // Generate slug from title
     const slug = title
@@ -48,13 +36,18 @@ export async function saveArticle(title: string, content: JSONContent) {
         .replace(/-+/g, '-')
         .trim();
 
-    const article = await insertArticle({
-        title: title.trim(),
-        slug,
-        content,
-        status: "draft",
-        authorId: user.id, // Use the database user's UUID, not Clerk ID
-    });
+    try {
+        const article = await insertArticle({
+            title: title.trim(),
+            slug,
+            content,
+            status: "draft",
+            authorId: user.id, // Use the database user's UUID, not Clerk ID
+        });
 
-    return article;
+        return { success: true, article };
+    } catch (error) {
+        console.error("Failed to save article:", error);
+        return { error: "Failed to save article. Please try again." };
+    }
 }
