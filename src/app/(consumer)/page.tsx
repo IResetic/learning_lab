@@ -39,14 +39,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   });
 
   return (
-    <div className="container my-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Learning Lab</h1>
-        <p className="text-xl text-muted-foreground">
-          Explore our latest articles and insights
-        </p>
-      </div>
-
+    <div className="container max-w-4xl my-8">
       {articles.length === 0 ? (
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold mb-4">No articles published yet</h2>
@@ -62,36 +55,32 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 : formatDistanceToNow(new Date(article.createdAt), { addSuffix: true });
 
               return (
-                <article key={article.id} className="border-b border-border pb-8 last:border-b-0">
-                  <div className="space-y-3">
-                    <Link 
-                      href={`/articles/${article.slug}`}
-                      className="block group"
-                    >
-                      <h2 className="text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors">
-                        {article.title}
-                      </h2>
-                    </Link>
-                    
-                    {preview && (
-                      <p className="text-muted-foreground leading-relaxed">
-                        {preview}
-                      </p>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Published {publishedDate}
-                      </span>
-                      
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/articles/${article.slug}`}>
-                          Read More
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </article>
+                <div key={article.id} className="border-b border-border pb-8">
+                  <Link 
+                    href={`/articles/${article.slug}`}
+                    className="block group hover:bg-muted/10 transition-colors rounded-lg p-4 -m-4"
+                  >
+                    <article>
+                      <div className="space-y-3">
+                        <h2 className="text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h2>
+                        
+                        {preview && (
+                          <p className="text-muted-foreground leading-relaxed">
+                            {preview}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">
+                            Published {publishedDate}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                </div>
               );
             })}
           </div>
