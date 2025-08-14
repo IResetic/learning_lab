@@ -1,8 +1,12 @@
+"use client";
+
 import { ArticleTable } from "@/drizzle/schema/article";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { unpublishArticleFromCard, publishArticleFromCard } from "./card-actions";
+import { useState } from "react";
 
 type ArticleCardProps = {
     article: typeof ArticleTable.$inferSelect;
@@ -31,6 +35,43 @@ function extractTextPreview(content: any): string {
 export function ArticleCard({ article }: ArticleCardProps) {
     const preview = extractTextPreview(article.content);
     const timeAgo = formatDistanceToNow(new Date(article.createdAt), { addSuffix: true });
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    const handleUnpublish = async () => {
+        setIsUpdating(true);
+        try {
+            const result = await unpublishArticleFromCard(article.id);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                // The page will automatically update due to revalidatePath
+                console.log("Article unpublished successfully");
+            }
+        } catch (error) {
+            console.error("Failed to unpublish:", error);
+            alert("Failed to unpublish article. Please try again.");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handlePublish = async () => {
+        setIsUpdating(true);
+        try {
+            const result = await publishArticleFromCard(article.id);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                // The page will automatically update due to revalidatePath
+                console.log("Article published successfully");
+            }
+        } catch (error) {
+            console.error("Failed to publish:", error);
+            alert("Failed to publish article. Please try again.");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
     
     return (
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow">
@@ -67,16 +108,31 @@ export function ArticleCard({ article }: ArticleCardProps) {
                 </div>
                 
                 <div className="flex gap-2 mt-4">
-                    <Button asChild size="sm" className="flex-1">
+                    <Button asChild size="sm" className="flex-1" disabled={isUpdating}>
                         <Link href={`/admin/articles/${article.id}/edit`}>
                             Edit
                         </Link>
                     </Button>
+                    
                     {article.status === "draft" && (
-                        <Button asChild size="sm" variant="outline">
-                            <Link href={`/admin/articles/${article.id}/publish`}>
-                                Publish
-                            </Link>
+                        <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={handlePublish}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? "Publishing..." : "Publish"}
+                        </Button>
+                    )}
+                    
+                    {article.status === "published" && (
+                        <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={handleUnpublish}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? "Unpublishing..." : "Unpublish"}
                         </Button>
                     )}
                 </div>

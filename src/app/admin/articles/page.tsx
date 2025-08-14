@@ -13,8 +13,8 @@ type ArticlesPageProps = {
 }
 
 export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
-    const page = parseInt(searchParams.page || "1");
-    const status = searchParams.status;
+    const { page: pageParam, status } = await searchParams;
+    const page = parseInt(pageParam || "1");
     
     const { articles, pagination } = await getArticles({
         page,

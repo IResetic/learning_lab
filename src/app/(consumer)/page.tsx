@@ -1,7 +1,126 @@
-export default function HomePage() {
+import { getPublishedArticles } from "@/features/articles/db/articles";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+
+type HomePageProps = {
+  searchParams: {
+    page?: string;
+  };
+}
+
+function extractTextPreview(content: any): string {
+  // Extract plain text from TipTap JSON content
+  if (!content || !content.content) return "";
+  
+  const extractText = (node: any): string => {
+    if (node.type === "text") {
+      return node.text || "";
+    }
+    
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map(extractText).join(" ");
+    }
+    
+    return "";
+  };
+  
+  const text = content.content.map(extractText).join(" ");
+  return text.slice(0, 200) + (text.length > 200 ? "..." : "");
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const { page: pageParam } = await searchParams;
+  const page = parseInt(pageParam || "1");
+  
+  const { articles, pagination } = await getPublishedArticles({
+    page,
+    limit: 10,
+  });
+
   return (
-    <div className="container">
-      <h1>Hi</h1>
+    <div className="container my-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Learning Lab</h1>
+        <p className="text-xl text-muted-foreground">
+          Explore our latest articles and insights
+        </p>
+      </div>
+
+      {articles.length === 0 ? (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold mb-4">No articles published yet</h2>
+          <p className="text-muted-foreground">Check back later for new content!</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-8">
+            {articles.map((article) => {
+              const preview = extractTextPreview(article.content);
+              const publishedDate = article.publishedAt 
+                ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
+                : formatDistanceToNow(new Date(article.createdAt), { addSuffix: true });
+
+              return (
+                <article key={article.id} className="border-b border-border pb-8 last:border-b-0">
+                  <div className="space-y-3">
+                    <Link 
+                      href={`/articles/${article.slug}`}
+                      className="block group"
+                    >
+                      <h2 className="text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors">
+                        {article.title}
+                      </h2>
+                    </Link>
+                    
+                    {preview && (
+                      <p className="text-muted-foreground leading-relaxed">
+                        {preview}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Published {publishedDate}
+                      </span>
+                      
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/articles/${article.slug}`}>
+                          Read More
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="mt-12 flex justify-center gap-2">
+              {pagination.hasPreviousPage && (
+                <Button asChild variant="outline">
+                  <Link href={`?page=${pagination.page - 1}`}>
+                    Previous
+                  </Link>
+                </Button>
+              )}
+              
+              <span className="flex items-center px-4 text-sm text-muted-foreground">
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+              
+              {pagination.hasNextPage && (
+                <Button asChild variant="outline">
+                  <Link href={`?page=${pagination.page + 1}`}>
+                    Next
+                  </Link>
+                </Button>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
-  )
+  );
 }

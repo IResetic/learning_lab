@@ -10,7 +10,10 @@ import { ArticleEditor } from "./ArticleEditor";
 type ArticleFormProps = {
   initialTitle?: string;
   initialContent?: JSONContent;
+  initialStatus?: "draft" | "published";
   onSave: (title: string, content: JSONContent) => Promise<{ error?: string; success?: boolean; article?: any }>;
+  onPublish?: (title: string, content: JSONContent) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
+  onUnpublish?: (title: string, content: JSONContent) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
   saveButtonText?: string;
   pageTitle: string;
   isEditing?: boolean;
@@ -19,7 +22,10 @@ type ArticleFormProps = {
 export function ArticleForm({ 
   initialTitle = "", 
   initialContent, 
+  initialStatus = "draft",
   onSave, 
+  onPublish,
+  onUnpublish,
   saveButtonText = "Save",
   pageTitle,
   isEditing = false
@@ -35,6 +41,8 @@ export function ArticleForm({
     ],
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isUnpublishing, setIsUnpublishing] = useState(false);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -57,6 +65,58 @@ export function ArticleForm({
       alert(`Failed to ${isEditing ? 'update' : 'save'} article. Please try again.`);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!onPublish) return;
+    
+    if (!title.trim()) {
+      alert("Please enter a title");
+      return;
+    }
+
+    setIsPublishing(true);
+    try {
+      const result = await onPublish(title, content);
+      
+      if (result.error) {
+        alert(result.error);
+      } else {
+        alert("Article published successfully!");
+        console.log("Published article:", result.article);
+      }
+    } catch (error) {
+      console.error("Failed to publish article:", error);
+      alert("Failed to publish article. Please try again.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!onUnpublish) return;
+    
+    if (!title.trim()) {
+      alert("Please enter a title");
+      return;
+    }
+
+    setIsUnpublishing(true);
+    try {
+      const result = await onUnpublish(title, content);
+      
+      if (result.error) {
+        alert(result.error);
+      } else {
+        alert("Article unpublished successfully!");
+        console.log("Unpublished article:", result.article);
+      }
+    } catch (error) {
+      console.error("Failed to unpublish article:", error);
+      alert("Failed to unpublish article. Please try again.");
+    } finally {
+      setIsUnpublishing(false);
     }
   };
 
@@ -87,19 +147,32 @@ export function ArticleForm({
           <Button 
             variant="outline"
             onClick={handleSave}
-            disabled={isSaving || !title.trim()}
+            disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
           >
             {isSaving ? `${isEditing ? 'Updating' : 'Saving'}...` : saveButtonText}
           </Button>
-          <Button 
-            onClick={() => {
-              // TODO: Implement publish functionality
-              console.log("Publish clicked");
-            }}
-            className="bg-primary hover:bg-primary/90"
-          >
-            Publish
-          </Button>
+          
+          {/* Show Publish button only if article is draft or for new articles */}
+          {onPublish && initialStatus === "draft" && (
+            <Button 
+              onClick={handlePublish}
+              disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {isPublishing ? "Publishing..." : "Publish"}
+            </Button>
+          )}
+          
+          {/* Show Unpublish button only if article is published */}
+          {onUnpublish && initialStatus === "published" && (
+            <Button 
+              onClick={handleUnpublish}
+              disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
+              variant="destructive"
+            >
+              {isUnpublishing ? "Unpublishing..." : "Unpublish"}
+            </Button>
+          )}
         </div>
 
         <ArticleEditor 

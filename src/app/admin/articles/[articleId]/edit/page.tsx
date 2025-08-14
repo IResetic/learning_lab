@@ -1,6 +1,6 @@
 import { getArticleById } from "@/features/articles/db/articles";
 import { ArticleForm } from "@/features/articles/components/ArticleForm";
-import { updateArticleAction } from "./actions";
+import { updateArticleAction, publishArticleAction, unpublishArticleAction } from "./actions";
 import { notFound } from "next/navigation";
 
 type EditArticlePageProps = {
@@ -10,7 +10,8 @@ type EditArticlePageProps = {
 }
 
 export default async function EditArticlePage({ params }: EditArticlePageProps) {
-    const article = await getArticleById(params.articleId);
+    const { articleId } = await params;
+    const article = await getArticleById(articleId);
 
     if (!article) {
         notFound();
@@ -18,14 +19,27 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
 
     const handleUpdate = async (title: string, content: any) => {
         "use server";
-        return await updateArticleAction(params.articleId, title, content);
+        return await updateArticleAction(articleId, title, content);
+    };
+
+    const handlePublish = async (title: string, content: any) => {
+        "use server";
+        return await publishArticleAction(articleId, title, content);
+    };
+
+    const handleUnpublish = async (title: string, content: any) => {
+        "use server";
+        return await unpublishArticleAction(articleId, title, content);
     };
 
     return (
         <ArticleForm
             initialTitle={article.title}
             initialContent={article.content}
+            initialStatus={article.status}
             onSave={handleUpdate}
+            onPublish={handlePublish}
+            onUnpublish={handleUnpublish}
             saveButtonText="Update"
             pageTitle="Edit Article"
             isEditing={true}
