@@ -2,6 +2,7 @@ import { getArticleById } from "@/features/articles/db/articles";
 import { ArticleForm } from "@/features/articles/components/ArticleForm";
 import { updateArticleAction, publishArticleAction, unpublishArticleAction } from "./actions";
 import { notFound } from "next/navigation";
+import { JSONContent } from "novel";
 
 type EditArticlePageProps = {
     params: {
@@ -35,7 +36,7 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
     return (
         <ArticleForm
             initialTitle={article.title}
-            initialContent={article.content}
+            initialContent={article.content as JSONContent}
             initialStatus={article.status}
             onSave={handleUpdate}
             onPublish={handlePublish}

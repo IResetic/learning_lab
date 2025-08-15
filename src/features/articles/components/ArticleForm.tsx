@@ -10,7 +10,7 @@ import { ArticleEditor } from "./ArticleEditor";
 type ArticleFormProps = {
   initialTitle?: string;
   initialContent?: JSONContent;
-  initialStatus?: "draft" | "published";
+  initialStatus?: "draft" | "published" | "archived";
   onSave: (title: string, content: JSONContent) => Promise<{ error?: string; success?: boolean; article?: any }>;
   onPublish?: (title: string, content: JSONContent) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
   onUnpublish?: (title: string, content: JSONContent) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
@@ -152,8 +152,8 @@ export function ArticleForm({
             {isSaving ? `${isEditing ? 'Updating' : 'Saving'}...` : saveButtonText}
           </Button>
           
-          {/* Show Publish button only if article is draft or for new articles */}
-          {onPublish && initialStatus === "draft" && (
+          {/* Show Publish button for draft or archived articles */}
+          {onPublish && (initialStatus === "draft" || initialStatus === "archived") && (
             <Button 
               onClick={handlePublish}
               disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
