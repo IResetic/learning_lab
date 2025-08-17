@@ -8,11 +8,12 @@ interface ImageAttrs {
   alt?: string;
   title?: string;
   position?: 'start' | 'center' | 'end';
+  width?: number;
 }
 
 const ImageComponent = (props: any) => {
   const { node, updateAttributes, selected } = props;
-  const { src, alt, title, position = 'start' } = node.attrs as ImageAttrs;
+  const { src, alt, title, position = 'start', width } = node.attrs as ImageAttrs;
 
   const positionClasses = {
     start: 'justify-start',
@@ -24,6 +25,29 @@ const ImageComponent = (props: any) => {
     updateAttributes({ position: newPosition });
   };
 
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const img = e.currentTarget.parentElement?.querySelector('img');
+    if (!img) return;
+    
+    const startWidth = img.offsetWidth;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(100, Math.min(800, startWidth + deltaX));
+      updateAttributes({ width: newWidth });
+    };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <NodeViewWrapper className={`flex ${positionClasses[position]} my-4`}>
       <div className="relative group">
@@ -32,6 +56,7 @@ const ImageComponent = (props: any) => {
           alt={alt || ''}
           title={title}
           className="rounded-lg max-w-full h-auto"
+          style={{ width: width ? `${width}px` : undefined }}
         />
         
         {selected && (
@@ -83,6 +108,14 @@ const ImageComponent = (props: any) => {
             </button>
           </div>
         )}
+        
+        {selected && (
+          <div 
+            className="absolute bottom-2 right-2 w-4 h-4 bg-blue-500 rounded-full cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity border-2 border-white shadow-lg"
+            onMouseDown={handleResizeStart}
+            title="Drag to resize"
+          />
+        )}
       </div>
     </NodeViewWrapper>
   );
@@ -118,6 +151,21 @@ export const PositionableImage = Node.create({
           };
         },
       },
+      width: {
+        default: null,
+        parseHTML: element => {
+          const width = element.getAttribute('data-width');
+          return width ? parseInt(width) : null;
+        },
+        renderHTML: attributes => {
+          if (!attributes.width) {
+            return {};
+          }
+          return {
+            'data-width': attributes.width,
+          };
+        },
+      },
     };
   },
 
@@ -127,11 +175,13 @@ export const PositionableImage = Node.create({
         tag: 'img[src]',
         getAttrs: element => {
           const img = element as HTMLImageElement;
+          const widthAttr = img.getAttribute('data-width') || img.parentElement?.getAttribute('data-width');
           return {
             src: img.getAttribute('src'),
             alt: img.getAttribute('alt'),
             title: img.getAttribute('title'),
-            position: img.getAttribute('data-position') || 'start',
+            position: img.getAttribute('data-position') || img.parentElement?.getAttribute('data-position') || 'start',
+            width: widthAttr ? parseInt(widthAttr) : null,
           };
         },
       },
@@ -139,20 +189,26 @@ export const PositionableImage = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { position, ...attrs } = HTMLAttributes;
+    const { position, width, ...attrs } = HTMLAttributes;
     const positionClasses = {
       start: 'flex justify-start',
       center: 'flex justify-center',
       end: 'flex justify-end'
     };
     
+    const imgAttrs = mergeAttributes(attrs);
+    if (width) {
+      imgAttrs.style = `width: ${width}px;`;
+    }
+    
     return [
       'div', 
       { 
         class: `${positionClasses[position as keyof typeof positionClasses] || positionClasses.start} my-4`,
-        'data-position': position 
+        'data-position': position,
+        'data-width': width
       },
-      ['img', mergeAttributes(attrs)]
+      ['img', imgAttrs]
     ];
   },
 
