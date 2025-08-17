@@ -18,19 +18,19 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
         notFound();
     }
 
-    const handleUpdate = async (title: string, content: any) => {
+    const handleUpdate = async (title: string, contentString: string) => {
         "use server";
-        return await updateArticleAction(articleId, title, content);
+        return await updateArticleAction(articleId, title, contentString);
     };
 
-    const handlePublish = async (title: string, content: any) => {
+    const handlePublish = async (title: string, contentString: string) => {
         "use server";
-        return await publishArticleAction(articleId, title, content);
+        return await publishArticleAction(articleId, title, contentString);
     };
 
-    const handleUnpublish = async (title: string, content: any) => {
+    const handleUnpublish = async (title: string, contentString: string) => {
         "use server";
-        return await unpublishArticleAction(articleId, title, content);
+        return await unpublishArticleAction(articleId, title, contentString);
     };
 
     return (

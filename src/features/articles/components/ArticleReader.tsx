@@ -2,6 +2,7 @@
 
 import { EditorContent, EditorRoot, StarterKit, TiptapImage } from "novel";
 import { JSONContent } from "novel";
+import { Heading } from "@tiptap/extension-heading";
 
 type ArticleReaderProps = {
   content: JSONContent;

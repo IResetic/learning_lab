@@ -4,12 +4,16 @@ import { eq, and, isNull, desc, count } from "drizzle-orm";
 import { revalidateArticleCache } from "@/features/articles/db/cache";
 
 export async function insertArticle(data: typeof ArticleTable.$inferInsert) {
+    console.log("Inserting article with content:", JSON.stringify(data.content, null, 2));
+    
     const [newArticle] = await db
         .insert(ArticleTable)
         .values(data)
         .returning()
 
     if (newArticle == null) throw new Error("Failed to create article")
+    
+    console.log("Retrieved article with content:", JSON.stringify(newArticle.content, null, 2));
     
     revalidateArticleCache(newArticle.id, newArticle.slug, newArticle.authorId)
 

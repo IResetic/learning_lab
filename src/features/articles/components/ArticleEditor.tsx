@@ -110,6 +110,7 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
   ];
 
   const handleContentUpdate = (newContent: JSONContent) => {
+    console.log("Editor content updated:", JSON.stringify(newContent, null, 2));
     setContent(newContent);
     onContentChange(newContent);
   };

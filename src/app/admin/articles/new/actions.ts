@@ -8,7 +8,17 @@ import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/services/clerk";
 import { canAccessAdminPages } from "@/permissons/general";
 
-export async function saveArticle(title: string, content: JSONContent) {
+export async function saveArticle(title: string, contentString: string) {
+    console.log("Raw contentString received:", contentString);
+    let content: JSONContent;
+    try {
+        content = JSON.parse(contentString) as JSONContent;
+        console.log("Parsed content:", JSON.stringify(content, null, 2));
+    } catch (error) {
+        console.error("Failed to parse content:", error);
+        return { error: "Invalid content format" };
+    }
+    
     // Get current user with role information
     const currentUser = await getCurrentUser({ allData: true });
     
@@ -49,7 +59,8 @@ export async function saveArticle(title: string, content: JSONContent) {
     }
 }
 
-export async function saveAndPublishArticle(title: string, content: JSONContent) {
+export async function saveAndPublishArticle(title: string, contentString: string) {
+    const content = JSON.parse(contentString) as JSONContent;
     // Get current user with role information
     const currentUser = await getCurrentUser({ allData: true });
     

@@ -5,7 +5,8 @@ import { JSONContent } from "novel";
 import { getCurrentUser } from "@/services/clerk";
 import { canAccessAdminPages } from "@/permissons/general";
 
-export async function updateArticleAction(articleId: string, title: string, content: JSONContent) {
+export async function updateArticleAction(articleId: string, title: string, contentString: string) {
+    const content = JSON.parse(contentString) as JSONContent;
     // Get current user with role information
     const currentUser = await getCurrentUser({ allData: true });
     
@@ -53,7 +54,8 @@ export async function updateArticleAction(articleId: string, title: string, cont
     }
 }
 
-export async function publishArticleAction(articleId: string, title: string, content: JSONContent) {
+export async function publishArticleAction(articleId: string, title: string, contentString: string) {
+    const content = JSON.parse(contentString) as JSONContent;
     // Get current user with role information
     const currentUser = await getCurrentUser({ allData: true });
     
@@ -105,7 +107,8 @@ export async function publishArticleAction(articleId: string, title: string, con
     }
 }
 
-export async function unpublishArticleAction(articleId: string, title: string, content: JSONContent) {
+export async function unpublishArticleAction(articleId: string, title: string, contentString: string) {
+    const content = JSON.parse(contentString) as JSONContent;
     // Get current user with role information
     const currentUser = await getCurrentUser({ allData: true });
     
