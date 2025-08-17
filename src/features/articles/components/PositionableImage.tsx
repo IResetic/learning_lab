@@ -31,7 +31,7 @@ const ImageComponent = (props: any) => {
           src={src}
           alt={alt || ''}
           title={title}
-          className="rounded-lg border border-muted max-w-full h-auto"
+          className="rounded-lg max-w-full h-auto"
         />
         
         {selected && (
