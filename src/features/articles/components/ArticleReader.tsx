@@ -1,8 +1,9 @@
 "use client";
 
-import { EditorContent, EditorRoot, StarterKit, TiptapImage } from "novel";
+import { EditorContent, EditorRoot, StarterKit } from "novel";
 import { JSONContent } from "novel";
 import { Heading } from "@tiptap/extension-heading";
+import { PositionableImage } from "./PositionableImage";
 
 type ArticleReaderProps = {
   content: JSONContent;
@@ -23,13 +24,7 @@ export function ArticleReader({ content }: ArticleReaderProps) {
         keepAttributes: false,
       },
     }),
-    TiptapImage.configure({
-      inline: false,
-      allowBase64: true,
-      HTMLAttributes: {
-        class: "rounded-lg border border-muted max-w-full h-auto",
-      },
-    }),
+    PositionableImage.configure({}),
   ];
 
   return (

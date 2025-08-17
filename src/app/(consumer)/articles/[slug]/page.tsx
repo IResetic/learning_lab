@@ -25,7 +25,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="container max-w-4xl my-8">
             <article className="prose prose-lg dark:prose-invert max-w-none">
                 <header className="mb-8 not-prose">
-                    <h1 className="text-4xl font-bold tracking-tight mb-4">
+                    <h1 className="text-5xl font-bold tracking-tight mb-4">
                         {article.title}
                     </h1>
                     <div className="text-muted-foreground">

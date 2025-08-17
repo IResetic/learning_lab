@@ -11,7 +11,6 @@ import {
   handleCommandNavigation,
   StarterKit,
   Placeholder,
-  TiptapImage,
   EditorBubble,
   EditorBubbleItem,
 } from "novel";
@@ -19,6 +18,7 @@ import { useState, useRef } from "react";
 import { Editor } from "@tiptap/react";
 import { cn } from "@/lib/utils";
 import { suggestionItems, slashCommand } from "./slash-command";
+import { PositionableImage } from "./PositionableImage";
 
 type ArticleEditorProps = {
   initialContent?: JSONContent;
@@ -56,7 +56,7 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
       const reader = new FileReader();
       reader.onload = (event) => {
         const src = event.target?.result as string;
-        editorRef.current?.chain().focus().setImage({ src }).createParagraphNear().run();
+        editorRef.current?.chain().focus().setImage({ src, position: 'start' }).createParagraphNear().run();
       };
       reader.readAsDataURL(imageFile);
     }
@@ -72,7 +72,7 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
         const reader = new FileReader();
         reader.onload = (event) => {
           const src = event.target?.result as string;
-          editorRef.current?.chain().focus().setImage({ src }).createParagraphNear().run();
+          editorRef.current?.chain().focus().setImage({ src, position: 'start' }).createParagraphNear().run();
         };
         reader.readAsDataURL(file);
       }
@@ -93,13 +93,7 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
         keepAttributes: false,
       },
     }),
-    TiptapImage.configure({
-      inline: false,
-      allowBase64: true,
-      HTMLAttributes: {
-        class: "rounded-lg border border-muted",
-      },
-    }),
+    PositionableImage.configure({}),
     Placeholder.configure({
       placeholder: "Type '/' for commands...",
       showOnlyWhenEditable: true,
@@ -164,43 +158,109 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
             }}
             className="flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
           >
-            <EditorBubbleItem
-              onSelect={(editor) => {
-                editor.chain().focus().toggleBold().run();
-              }}
-              className={cn(
-                "p-2 transition-all hover:bg-muted",
-                editorRef.current?.isActive("bold") 
-                  ? "bg-muted text-foreground" 
-                  : "text-muted-foreground"
-              )}
-            >
-              <div className="flex items-center justify-center">
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/>
-                </svg>
-              </div>
-            </EditorBubbleItem>
-            
-            <div className="h-8 w-px bg-border" />
-            
-            <EditorBubbleItem
-              onSelect={(editor) => {
-                editor.chain().focus().toggleItalic().run();
-              }}
-              className={cn(
-                "p-2 transition-all hover:bg-muted",
-                editorRef.current?.isActive("italic") 
-                  ? "bg-muted text-foreground" 
-                  : "text-muted-foreground"
-              )}
-            >
-              <div className="flex items-center justify-center">
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4h-8z"/>
-                </svg>
-              </div>
-            </EditorBubbleItem>
+            {editorRef.current?.isActive("positionableImage") ? (
+              <>
+                {/* Image positioning controls */}
+                <EditorBubbleItem
+                  onSelect={(editor) => {
+                    editor.chain().focus().updateImagePosition('start').run();
+                  }}
+                  className={cn(
+                    "p-2 transition-all hover:bg-muted",
+                    editorRef.current?.getAttributes("positionableImage")?.position === "start"
+                      ? "bg-muted text-foreground" 
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <div className="flex items-center justify-center" title="Align left">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 19h18v2H3zm0-2h10v2H3zm0-4h18v2H3zm0-4h10v2H3zm0-4h18v2H3z"/>
+                    </svg>
+                  </div>
+                </EditorBubbleItem>
+                
+                <div className="h-8 w-px bg-border" />
+                
+                <EditorBubbleItem
+                  onSelect={(editor) => {
+                    editor.chain().focus().updateImagePosition('center').run();
+                  }}
+                  className={cn(
+                    "p-2 transition-all hover:bg-muted",
+                    editorRef.current?.getAttributes("positionableImage")?.position === "center"
+                      ? "bg-muted text-foreground" 
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <div className="flex items-center justify-center" title="Align center">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 19h18v2H3zm4-2h10v2H7zm-4-4h18v2H3zm4-4h10v2H7zm-4-4h18v2H3z"/>
+                    </svg>
+                  </div>
+                </EditorBubbleItem>
+                
+                <div className="h-8 w-px bg-border" />
+                
+                <EditorBubbleItem
+                  onSelect={(editor) => {
+                    editor.chain().focus().updateImagePosition('end').run();
+                  }}
+                  className={cn(
+                    "p-2 transition-all hover:bg-muted",
+                    editorRef.current?.getAttributes("positionableImage")?.position === "end"
+                      ? "bg-muted text-foreground" 
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <div className="flex items-center justify-center" title="Align right">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 19h18v2H3zm8-2h10v2H11zm-8-4h18v2H3zm8-4h10v2H11zm-8-4h18v2H3z"/>
+                    </svg>
+                  </div>
+                </EditorBubbleItem>
+              </>
+            ) : (
+              <>
+                {/* Text formatting controls */}
+                <EditorBubbleItem
+                  onSelect={(editor) => {
+                    editor.chain().focus().toggleBold().run();
+                  }}
+                  className={cn(
+                    "p-2 transition-all hover:bg-muted",
+                    editorRef.current?.isActive("bold") 
+                      ? "bg-muted text-foreground" 
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <div className="flex items-center justify-center">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/>
+                    </svg>
+                  </div>
+                </EditorBubbleItem>
+                
+                <div className="h-8 w-px bg-border" />
+                
+                <EditorBubbleItem
+                  onSelect={(editor) => {
+                    editor.chain().focus().toggleItalic().run();
+                  }}
+                  className={cn(
+                    "p-2 transition-all hover:bg-muted",
+                    editorRef.current?.isActive("italic") 
+                      ? "bg-muted text-foreground" 
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <div className="flex items-center justify-center">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4h-8z"/>
+                    </svg>
+                  </div>
+                </EditorBubbleItem>
+              </>
+            )}
           </EditorBubble>
 
           <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
