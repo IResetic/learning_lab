@@ -14,6 +14,7 @@ type ArticleFormProps = {
   onSave: (title: string, content: string) => Promise<{ error?: string; success?: boolean; article?: any }>;
   onPublish?: (title: string, content: string) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
   onUnpublish?: (title: string, content: string) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
+  onDelete?: () => Promise<{ error?: string; success?: boolean; deleted?: boolean }>;
   saveButtonText?: string;
   pageTitle: string;
   isEditing?: boolean;
@@ -26,6 +27,7 @@ export function ArticleForm({
   onSave, 
   onPublish,
   onUnpublish,
+  onDelete,
   saveButtonText = "Save",
   pageTitle,
   isEditing = false
@@ -35,6 +37,7 @@ export function ArticleForm({
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -135,6 +138,31 @@ export function ArticleForm({
     }
   };
 
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    
+    if (!confirm("Are you sure you want to delete this article? This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const result = await onDelete();
+      
+      if (result.error) {
+        alert(result.error);
+      } else {
+        alert("Article deleted successfully!");
+        // Navigation will be handled by the server action
+      }
+    } catch (error) {
+      console.error("Failed to delete article:", error);
+      alert("Failed to delete article. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <>
       <div className="container my-6">
@@ -162,7 +190,7 @@ export function ArticleForm({
           <Button 
             variant="outline"
             onClick={handleSave}
-            disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
+            disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
           >
             {isSaving ? `${isEditing ? 'Updating' : 'Saving'}...` : saveButtonText}
           </Button>
@@ -171,7 +199,7 @@ export function ArticleForm({
           {onPublish && (initialStatus === "draft" || initialStatus === "archived") && (
             <Button 
               onClick={handlePublish}
-              disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
+              disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
               className="bg-primary hover:bg-primary/90"
             >
               {isPublishing ? "Publishing..." : "Publish"}
@@ -182,10 +210,22 @@ export function ArticleForm({
           {onUnpublish && initialStatus === "published" && (
             <Button 
               onClick={handleUnpublish}
-              disabled={isSaving || isPublishing || isUnpublishing || !title.trim()}
+              disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
               variant="destructive"
             >
               {isUnpublishing ? "Unpublishing..." : "Unpublish"}
+            </Button>
+          )}
+          
+          {/* Show Delete button only when editing */}
+          {onDelete && isEditing && (
+            <Button 
+              onClick={handleDelete}
+              disabled={isSaving || isPublishing || isUnpublishing || isDeleting}
+              variant="destructive"
+              className="ml-auto"
+            >
+              {isDeleting ? "Deleting..." : "Delete Article"}
             </Button>
           )}
         </div>

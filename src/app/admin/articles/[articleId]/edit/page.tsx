@@ -1,7 +1,7 @@
 import { getArticleById } from "@/features/articles/db/articles";
 import { ArticleForm } from "@/features/articles/components/ArticleForm";
-import { updateArticleAction, publishArticleAction, unpublishArticleAction } from "./actions";
-import { notFound } from "next/navigation";
+import { updateArticleAction, publishArticleAction, unpublishArticleAction, deleteArticleAction } from "./actions";
+import { notFound, redirect } from "next/navigation";
 import { JSONContent } from "novel";
 
 type EditArticlePageProps = {
@@ -33,6 +33,15 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
         return await unpublishArticleAction(articleId, title, contentString);
     };
 
+    const handleDelete = async () => {
+        "use server";
+        const result = await deleteArticleAction(articleId);
+        if (result.success) {
+            redirect("/admin/articles");
+        }
+        return result;
+    };
+
     return (
         <ArticleForm
             initialTitle={article.title}
@@ -41,6 +50,7 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
             onSave={handleUpdate}
             onPublish={handlePublish}
             onUnpublish={handleUnpublish}
+            onDelete={handleDelete}
             saveButtonText="Update"
             pageTitle="Edit Article"
             isEditing={true}

@@ -1,6 +1,6 @@
 "use server";
 
-import { updateArticle, getArticleById, publishArticle, unpublishArticle } from "@/features/articles/db/articles";
+import { updateArticle, getArticleById, publishArticle, unpublishArticle, deleteArticle } from "@/features/articles/db/articles";
 import { JSONContent } from "novel";
 import { getCurrentUser } from "@/services/clerk";
 import { canAccessAdminPages } from "@/permissons/general";
@@ -157,5 +157,33 @@ export async function unpublishArticleAction(articleId: string, title: string, c
     } catch (error) {
         console.error("Failed to unpublish article:", error);
         return { error: "Failed to unpublish article. Please try again." };
+    }
+}
+
+export async function deleteArticleAction(articleId: string) {
+    // Get current user with role information
+    const currentUser = await getCurrentUser({ allData: true });
+    
+    if (!currentUser || !currentUser.user) {
+        return { error: "You must be logged in to delete articles" };
+    }
+
+    // Check admin permissions
+    if (!canAccessAdminPages({ role: currentUser.role })) {
+        return { error: "You do not have permission to delete articles" };
+    }
+
+    // Verify article exists
+    const existingArticle = await getArticleById(articleId);
+    if (!existingArticle) {
+        return { error: "Article not found" };
+    }
+
+    try {
+        const deletedArticle = await deleteArticle({ id: articleId });
+        return { success: true, deleted: true };
+    } catch (error) {
+        console.error("Failed to delete article:", error);
+        return { error: "Failed to delete article. Please try again." };
     }
 }
