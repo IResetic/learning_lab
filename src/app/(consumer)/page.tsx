@@ -49,7 +49,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <>
           <div className="space-y-8">
             {articles.map((article) => {
-              const preview = extractTextPreview(article.content);
+              const preview = article.excerpt || extractTextPreview(article.content);
               const publishedDate = article.publishedAt 
                 ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
                 : formatDistanceToNow(new Date(article.createdAt), { addSuffix: true });

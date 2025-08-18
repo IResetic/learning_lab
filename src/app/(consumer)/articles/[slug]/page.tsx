@@ -28,6 +28,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <h1 className="text-5xl font-bold tracking-tight mb-4">
                         {article.title}
                     </h1>
+                    {article.excerpt && (
+                        <p className="text-xl text-muted-foreground mb-4 leading-relaxed">
+                            {article.excerpt}
+                        </p>
+                    )}
                     <div className="text-muted-foreground">
                         Published {publishedDate}
                     </div>
