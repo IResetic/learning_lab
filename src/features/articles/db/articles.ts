@@ -65,7 +65,22 @@ export async function deleteArticle({ id }: { id: string }) {
 
 export async function getArticleById(id: string) {
     const [article] = await db
-        .select()
+        .select({
+            id: ArticleTable.id,
+            title: ArticleTable.title,
+            slug: ArticleTable.slug,
+            content: ArticleTable.content,
+            excerpt: ArticleTable.excerpt,
+            status: ArticleTable.status,
+            publishedAt: ArticleTable.publishedAt,
+            authorId: ArticleTable.authorId,
+            metaTitle: ArticleTable.metaTitle,
+            metaDescription: ArticleTable.metaDescription,
+            featuredImage: ArticleTable.featuredImage,
+            deletedAt: ArticleTable.deletedAt,
+            createdAt: ArticleTable.createdAt,
+            updatedAt: ArticleTable.updatedAt
+        })
         .from(ArticleTable)
         .where(and(
             eq(ArticleTable.id, id),

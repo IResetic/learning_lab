@@ -18,19 +18,19 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
         notFound();
     }
 
-    const handleUpdate = async (title: string, contentString: string) => {
+    const handleUpdate = async (title: string, contentString: string, excerpt: string) => {
         "use server";
-        return await updateArticleAction(articleId, title, contentString);
+        return await updateArticleAction(articleId, title, contentString, excerpt);
     };
 
-    const handlePublish = async (title: string, contentString: string) => {
+    const handlePublish = async (title: string, contentString: string, excerpt: string) => {
         "use server";
-        return await publishArticleAction(articleId, title, contentString);
+        return await publishArticleAction(articleId, title, contentString, excerpt);
     };
 
-    const handleUnpublish = async (title: string, contentString: string) => {
+    const handleUnpublish = async (title: string, contentString: string, excerpt: string) => {
         "use server";
-        return await unpublishArticleAction(articleId, title, contentString);
+        return await unpublishArticleAction(articleId, title, contentString, excerpt);
     };
 
     const handleDelete = async () => {
@@ -46,6 +46,7 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
         <ArticleForm
             initialTitle={article.title}
             initialContent={article.content as JSONContent}
+            initialExcerpt={article.excerpt ?? ""}
             initialStatus={article.status}
             onSave={handleUpdate}
             onPublish={handlePublish}

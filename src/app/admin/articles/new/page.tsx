@@ -2,14 +2,14 @@ import { ArticleForm } from "@/features/articles/components/ArticleForm";
 import { saveArticle, saveAndPublishArticle } from "./actions";
 
 export default function NewArticlesPage() {
-    const handleSave = async (title: string, contentString: string) => {
+    const handleSave = async (title: string, contentString: string, excerpt: string) => {
         "use server";
-        return await saveArticle(title, contentString);
+        return await saveArticle(title, contentString, excerpt);
     };
 
-    const handlePublish = async (title: string, contentString: string) => {
+    const handlePublish = async (title: string, contentString: string, excerpt: string) => {
         "use server";
-        return await saveAndPublishArticle(title, contentString);
+        return await saveAndPublishArticle(title, contentString, excerpt);
     };
 
     return (

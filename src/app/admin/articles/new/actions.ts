@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/services/clerk";
 import { canAccessAdminPages } from "@/permissons/general";
 
-export async function saveArticle(title: string, contentString: string) {
+export async function saveArticle(title: string, contentString: string, excerpt: string) {
     console.log("Raw contentString received:", contentString);
     let content: JSONContent;
     try {
@@ -48,6 +48,7 @@ export async function saveArticle(title: string, contentString: string) {
             title: title.trim(),
             slug,
             content,
+            excerpt: excerpt.trim() || null,
             status: "draft",
             authorId: currentUser.user.id, // Use the database user's UUID
         });
@@ -59,7 +60,7 @@ export async function saveArticle(title: string, contentString: string) {
     }
 }
 
-export async function saveAndPublishArticle(title: string, contentString: string) {
+export async function saveAndPublishArticle(title: string, contentString: string, excerpt: string) {
     const content = JSON.parse(contentString) as JSONContent;
     // Get current user with role information
     const currentUser = await getCurrentUser({ allData: true });
@@ -90,6 +91,7 @@ export async function saveAndPublishArticle(title: string, contentString: string
             title: title.trim(),
             slug,
             content,
+            excerpt: excerpt.trim() || null,
             status: "published",
             publishedAt: new Date(),
             authorId: currentUser.user.id, // Use the database user's UUID

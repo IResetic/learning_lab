@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { JSONContent } from "novel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArticleEditor } from "./ArticleEditor";
 
 type ArticleFormProps = {
   initialTitle?: string;
   initialContent?: JSONContent;
+  initialExcerpt?: string;
   initialStatus?: "draft" | "published" | "archived";
-  onSave: (title: string, content: string) => Promise<{ error?: string; success?: boolean; article?: any }>;
-  onPublish?: (title: string, content: string) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
-  onUnpublish?: (title: string, content: string) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
+  onSave: (title: string, content: string, excerpt: string) => Promise<{ error?: string; success?: boolean; article?: any }>;
+  onPublish?: (title: string, content: string, excerpt: string) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
+  onUnpublish?: (title: string, content: string, excerpt: string) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
   onDelete?: () => Promise<{ error?: string; success?: boolean; deleted?: boolean }>;
   saveButtonText?: string;
   pageTitle: string;
@@ -23,6 +25,7 @@ type ArticleFormProps = {
 export function ArticleForm({ 
   initialTitle = "", 
   initialContent, 
+  initialExcerpt = "",
   initialStatus = "draft",
   onSave, 
   onPublish,
@@ -33,11 +36,17 @@ export function ArticleForm({
   isEditing = false
 }: ArticleFormProps) {
   const [title, setTitle] = useState(initialTitle);
+  const [excerpt, setExcerpt] = useState(initialExcerpt || "");
   const [content, setContent] = useState<JSONContent | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Update excerpt when initialExcerpt changes (for edit mode)
+  useEffect(() => {
+    setExcerpt(initialExcerpt || "");
+  }, [initialExcerpt]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -45,26 +54,20 @@ export function ArticleForm({
       return;
     }
 
-    if (!content) {
+    if (!content && !isEditing) {
       alert("Please add some content");
       return;
     }
 
     setIsSaving(true);
     try {
-      console.log("Saving article with content:", JSON.stringify(content, null, 2));
-      console.log("Content object direct:", content);
-      console.log("Content stringified then parsed:", JSON.parse(JSON.stringify(content)));
-      // Pre-stringify the content to preserve all properties
-      const contentString = JSON.stringify(content);
-      console.log("Sending contentString:", contentString);
-      const result = await onSave(title, contentString);
+      const contentString = JSON.stringify(content || initialContent);
+      const result = await onSave(title, contentString, excerpt);
       
       if (result.error) {
         alert(result.error);
       } else {
         alert(`Article ${isEditing ? 'updated' : 'saved'} successfully!`);
-        console.log(`${isEditing ? 'Updated' : 'Saved'} article:`, result.article);
       }
     } catch (error) {
       console.error(`Failed to ${isEditing ? 'update' : 'save'} article:`, error);
@@ -82,21 +85,20 @@ export function ArticleForm({
       return;
     }
 
-    if (!content) {
+    if (!content && !isEditing) {
       alert("Please add some content");
       return;
     }
 
     setIsPublishing(true);
     try {
-      const contentString = JSON.stringify(content);
-      const result = await onPublish(title, contentString);
+      const contentString = JSON.stringify(content || initialContent);
+      const result = await onPublish(title, contentString, excerpt);
       
       if (result.error) {
         alert(result.error);
       } else {
         alert("Article published successfully!");
-        console.log("Published article:", result.article);
       }
     } catch (error) {
       console.error("Failed to publish article:", error);
@@ -122,7 +124,7 @@ export function ArticleForm({
     setIsUnpublishing(true);
     try {
       const contentString = JSON.stringify(content);
-      const result = await onUnpublish(title, contentString);
+      const result = await onUnpublish(title, contentString, excerpt);
       
       if (result.error) {
         alert(result.error);
@@ -185,6 +187,25 @@ export function ArticleForm({
           />
         </div>
 
+        {/* Excerpt Input */}
+        <div className="mb-6">
+          <Label htmlFor="excerpt" className="text-base font-medium">
+            Article Summary
+          </Label>
+          <Textarea
+            id="excerpt"
+            placeholder="Enter a brief summary of your article (optional)..."
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            className="mt-2"
+            rows={3}
+            disabled={isSaving}
+          />
+          <p className="text-sm text-muted-foreground mt-1">
+            This summary will be used for article previews and search results.
+          </p>
+        </div>
+
         {/* Save Buttons */}
         <div className="flex gap-3 mb-6">
           <Button 
@@ -233,7 +254,6 @@ export function ArticleForm({
         <ArticleEditor 
           initialContent={initialContent}
           onContentChange={(newContent) => {
-            console.log("ArticleForm setting content:", JSON.stringify(newContent, null, 2));
             setContent(newContent);
           }}
         />
