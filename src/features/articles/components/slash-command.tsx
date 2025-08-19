@@ -1,6 +1,6 @@
 import { Command, createSuggestionItems, renderItems } from "novel";
 
-export const suggestionItems = createSuggestionItems([
+export const createSuggestionItemsWithUpload = (uploadImage: (file: File) => Promise<string | null>) => createSuggestionItems([
   {
     title: "Text",
     description: "Just start writing with plain text.",
@@ -87,7 +87,6 @@ export const suggestionItems = createSuggestionItems([
       <div className="text-sm">• •</div>
     </div>,
     command: ({ editor, range }) => {
-      console.log("Bullet List command triggered", { editor, range });
       editor
         .chain()
         .focus()
@@ -114,7 +113,7 @@ export const suggestionItems = createSuggestionItems([
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      input.onchange = (event) => {
+      input.onchange = async (event) => {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (file) {
           // Validate file
@@ -122,23 +121,20 @@ export const suggestionItems = createSuggestionItems([
             alert('Please select an image file');
             return;
           }
-          if (file.size / 1024 / 1024 > 20) {
-            alert('Image size should be less than 20MB');
+          if (file.size / 1024 / 1024 > 5) {
+            alert('Image size should be less than 5MB');
             return;
           }
           
-          // Use the same upload function as drag & drop
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const src = e.target?.result as string;
+          const src = await uploadImage(file);
+          if (src) {
             editor
               .chain()
               .focus()
               .setImage({ src })
               .createParagraphNear()
               .run();
-          };
-          reader.readAsDataURL(file);
+          }
         }
       };
       input.click();
@@ -146,9 +142,13 @@ export const suggestionItems = createSuggestionItems([
   },
 ]);
 
-export const slashCommand = Command.configure({
+export const createSlashCommand = (uploadImage: (file: File) => Promise<string | null>) => Command.configure({
   suggestion: {
-    items: () => suggestionItems,
+    items: () => createSuggestionItemsWithUpload(uploadImage),
     render: renderItems,
   },
 });
+
+// Keep default export for backward compatibility
+export const suggestionItems = createSuggestionItemsWithUpload(async () => null);
+export const slashCommand = createSlashCommand(async () => null);

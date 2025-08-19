@@ -17,7 +17,7 @@ import {
 import { useState, useRef } from "react";
 import { Editor } from "@tiptap/react";
 import { cn } from "@/lib/utils";
-import { suggestionItems, slashCommand } from "./slash-command";
+import { createSuggestionItemsWithUpload, createSlashCommand } from "./slash-command";
 import { PositionableImage } from "./PositionableImage";
 
 type ArticleEditorProps = {
@@ -47,37 +47,60 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
     e.dataTransfer.dropEffect = 'copy';
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error('Image upload error:', error);
+      alert('Failed to upload image. Please try again.');
+      return null;
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
     
     if (imageFile && editorRef.current) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const src = event.target?.result as string;
+      const src = await uploadImage(imageFile);
+      if (src) {
         editorRef.current?.chain().focus().setImage({ src, position: 'start' }).createParagraphNear().run();
-      };
-      reader.readAsDataURL(imageFile);
+      }
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
+  const handlePaste = async (e: React.ClipboardEvent) => {
     const items = Array.from(e.clipboardData.items);
     const imageItem = items.find(item => item.type.startsWith('image/'));
     
     if (imageItem && editorRef.current) {
       const file = imageItem.getAsFile();
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const src = event.target?.result as string;
+        const src = await uploadImage(file);
+        if (src) {
           editorRef.current?.chain().focus().setImage({ src, position: 'start' }).createParagraphNear().run();
-        };
-        reader.readAsDataURL(file);
+        }
       }
     }
   };
+
+  const suggestionItems = createSuggestionItemsWithUpload(uploadImage);
+  const slashCommand = createSlashCommand(uploadImage);
 
   const extensions = [
     StarterKit.configure({
@@ -104,7 +127,6 @@ export function ArticleEditor({ initialContent, onContentChange }: ArticleEditor
   ];
 
   const handleContentUpdate = (newContent: JSONContent) => {
-    console.log("Editor content updated:", JSON.stringify(newContent, null, 2));
     setContent(newContent);
     onContentChange(newContent);
   };
