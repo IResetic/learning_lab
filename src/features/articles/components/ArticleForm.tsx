@@ -7,15 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArticleEditor } from "./ArticleEditor";
+import { useRouter } from "next/navigation";
 
 type ArticleFormProps = {
   initialTitle?: string;
   initialContent?: JSONContent;
   initialExcerpt?: string;
+  initialFeaturedImage?: string;
   initialStatus?: "draft" | "published" | "archived";
-  onSave: (title: string, content: string, excerpt: string) => Promise<{ error?: string; success?: boolean; article?: any }>;
-  onPublish?: (title: string, content: string, excerpt: string) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
-  onUnpublish?: (title: string, content: string, excerpt: string) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
+  onSave: (title: string, content: string, excerpt: string, featuredImage: string) => Promise<{ error?: string; success?: boolean; article?: any }>;
+  onPublish?: (title: string, content: string, excerpt: string, featuredImage: string) => Promise<{ error?: string; success?: boolean; article?: any; published?: boolean }>;
+  onUnpublish?: (title: string, content: string, excerpt: string, featuredImage: string) => Promise<{ error?: string; success?: boolean; article?: any; unpublished?: boolean }>;
   onDelete?: () => Promise<{ error?: string; success?: boolean; deleted?: boolean }>;
   saveButtonText?: string;
   pageTitle: string;
@@ -26,6 +28,7 @@ export function ArticleForm({
   initialTitle = "", 
   initialContent, 
   initialExcerpt = "",
+  initialFeaturedImage = "",
   initialStatus = "draft",
   onSave, 
   onPublish,
@@ -35,18 +38,76 @@ export function ArticleForm({
   pageTitle,
   isEditing = false
 }: ArticleFormProps) {
+  const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [excerpt, setExcerpt] = useState(initialExcerpt || "");
+  const [featuredImage, setFeaturedImage] = useState(initialFeaturedImage || "");
   const [content, setContent] = useState<JSONContent | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Update excerpt when initialExcerpt changes (for edit mode)
   useEffect(() => {
     setExcerpt(initialExcerpt || "");
   }, [initialExcerpt]);
+
+  // Update featured image when initialFeaturedImage changes (for edit mode)
+  useEffect(() => {
+    setFeaturedImage(initialFeaturedImage || "");
+  }, [initialFeaturedImage]);
+
+  const uploadFeaturedImage = async (file: File): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error('Featured image upload error:', error);
+      alert('Failed to upload featured image. Please try again.');
+      return null;
+    }
+  };
+
+  const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    const url = await uploadFeaturedImage(file);
+    if (url) {
+      setFeaturedImage(url);
+    }
+    setIsUploadingImage(false);
+  };
+
+  const handleRemoveFeaturedImage = () => {
+    setFeaturedImage("");
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -62,7 +123,7 @@ export function ArticleForm({
     setIsSaving(true);
     try {
       const contentString = JSON.stringify(content || initialContent);
-      const result = await onSave(title, contentString, excerpt);
+      const result = await onSave(title, contentString, excerpt, featuredImage);
       
       if (result.error) {
         alert(result.error);
@@ -93,7 +154,7 @@ export function ArticleForm({
     setIsPublishing(true);
     try {
       const contentString = JSON.stringify(content || initialContent);
-      const result = await onPublish(title, contentString, excerpt);
+      const result = await onPublish(title, contentString, excerpt, featuredImage);
       
       if (result.error) {
         alert(result.error);
@@ -124,7 +185,7 @@ export function ArticleForm({
     setIsUnpublishing(true);
     try {
       const contentString = JSON.stringify(content);
-      const result = await onUnpublish(title, contentString, excerpt);
+      const result = await onUnpublish(title, contentString, excerpt, featuredImage);
       
       if (result.error) {
         alert(result.error);
@@ -162,6 +223,12 @@ export function ArticleForm({
       alert("Failed to delete article. Please try again.");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (confirm("Are you sure you want to cancel? All unsaved changes will be lost.")) {
+      router.push("/admin/articles");
     }
   };
 
@@ -206,8 +273,78 @@ export function ArticleForm({
           </p>
         </div>
 
+        {/* Featured Image */}
+        <div className="mb-6">
+          <Label htmlFor="featuredImage" className="text-base font-medium">
+            Featured Image
+          </Label>
+          
+          {featuredImage ? (
+            <div className="mt-2 space-y-3">
+              <div className="relative inline-block">
+                <img 
+                  src={featuredImage} 
+                  alt="Featured image" 
+                  className="w-full max-w-md h-48 object-cover rounded-lg border"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveFeaturedImage}
+                  disabled={isSaving || isPublishing || isUnpublishing || isDeleting}
+                >
+                  Remove Image
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('featuredImageInput')?.click()}
+                  disabled={isSaving || isPublishing || isUnpublishing || isDeleting || isUploadingImage}
+                >
+                  {isUploadingImage ? 'Uploading...' : 'Change Image'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('featuredImageInput')?.click()}
+                disabled={isSaving || isPublishing || isUnpublishing || isDeleting || isUploadingImage}
+              >
+                {isUploadingImage ? 'Uploading...' : 'Upload Featured Image'}
+              </Button>
+            </div>
+          )}
+          
+          <input
+            id="featuredImageInput"
+            type="file"
+            accept="image/*"
+            onChange={handleFeaturedImageUpload}
+            className="hidden"
+          />
+          
+          <p className="text-sm text-muted-foreground mt-1">
+            This image will be displayed in the article list and previews. Max size: 5MB.
+          </p>
+        </div>
+
         {/* Save Buttons */}
         <div className="flex gap-3 mb-6">
+          <Button 
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isSaving || isPublishing || isUnpublishing || isDeleting}
+          >
+            Cancel
+          </Button>
+          
           <Button 
             variant="outline"
             onClick={handleSave}

@@ -61,22 +61,33 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     className="block group hover:bg-muted/10 transition-colors rounded-lg p-4 -m-4"
                   >
                     <article>
-                      <div className="space-y-3">
-                        <h2 className="text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors">
-                          {article.title}
-                        </h2>
-                        
-                        {preview && (
-                          <p className="text-muted-foreground leading-relaxed">
-                            {preview}
-                          </p>
-                        )}
-                        
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Published {publishedDate}
-                          </span>
+                      <div className="flex gap-6">
+                        <div className="flex-1 space-y-3">
+                          <h2 className="text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors">
+                            {article.title}
+                          </h2>
+                          
+                          {preview && (
+                            <p className="text-muted-foreground leading-relaxed">
+                              {preview}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Published {publishedDate}
+                            </span>
+                          </div>
                         </div>
+                        {article.featuredImage && (
+                          <div className="flex-shrink-0 w-48">
+                            <img 
+                              src={article.featuredImage} 
+                              alt={article.title}
+                              className="w-full h-auto object-contain rounded-lg"
+                            />
+                          </div>
+                        )}
                       </div>
                     </article>
                   </Link>
