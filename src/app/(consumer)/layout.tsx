@@ -22,6 +22,15 @@ function Navbar() {
             <Link className={"mr-auto text-lg hover:underline flex items-center"} href="/">
                 Learning Lab
             </Link>
+            
+            {/* Navigation Links */}
+            <Link className="hover:bg-accent/10 flex items-center px-2" href="/about">
+                About
+            </Link>
+            <Link className="hover:bg-accent/10 flex items-center px-2" href="/">
+                Articles
+            </Link>
+            
             <Suspense>
                 <SignedIn>
                      <AdminLink />
