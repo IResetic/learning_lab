@@ -80,11 +80,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                           </div>
                         </div>
                         {article.featuredImage && (
-                          <div className="flex-shrink-0 w-48">
+                          <div className="flex-shrink-0 w-24 sm:w-32 md:w-48 h-20 sm:h-24 md:h-32">
                             <img 
                               src={article.featuredImage} 
                               alt={article.title}
-                              className="w-full h-auto object-contain rounded-lg"
+                              className="w-full h-full object-contain rounded-lg"
                             />
                           </div>
                         )}
