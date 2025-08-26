@@ -10,6 +10,6 @@ export const db = drizzle({
         database: env.DB_NAME,
         host: env.DB_HOST,
         port: env.DB_PORT,
-        ssl: { rejectUnauthorized: false },
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     },
 })
