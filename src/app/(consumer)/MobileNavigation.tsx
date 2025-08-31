@@ -17,8 +17,8 @@ export function MobileNavigation({ onToggle, isOpen }: MobileNavigationProps) {
   const pathname = usePathname();
 
   const links = [
-    { href: "/about", label: "About" },
     { href: "/", label: "Articles" },
+    { href: "/about", label: "About" },
   ];
 
   return (
@@ -34,7 +34,7 @@ export function MobileNavigation({ onToggle, isOpen }: MobileNavigationProps) {
 
           {/* Mobile Menu */}
           <div className="fixed top-14 md:top-12 left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-xl z-50 animate-in slide-in-from-top-2 duration-300">
-            <div className="container py-6 max-w-sm mx-auto">
+            <div className="py-6">
               {/* Navigation Links */}
               <nav className="space-y-1 mb-4">
                 {links.map((link) => {
@@ -43,10 +43,10 @@ export function MobileNavigation({ onToggle, isOpen }: MobileNavigationProps) {
                     <Link
                       key={link.href}
                       className={cn(
-                        "flex items-center w-full px-4 py-3.5 rounded-xl transition-all duration-200 text-[15px] font-medium",
+                        "flex items-center w-full py-3.5 transition-all duration-200 text-[15px] font-medium",
                         isActive
-                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                          : "text-foreground hover:bg-gray-50 active:scale-[0.98]"
+                          ? "bg-gray-100/70 text-black pl-4"
+                          : "text-foreground hover:bg-gray-50 active:scale-[0.98] rounded-xl px-4"
                       )}
                       href={link.href}
                       onClick={onToggle}
@@ -66,7 +66,7 @@ export function MobileNavigation({ onToggle, isOpen }: MobileNavigationProps) {
                     href="/admin"
                     onClick={onToggle}
                   >
-                    Admin Panel
+                    Admin
                   </Link>
                   
                   {/* User Profile Section */}

@@ -33,7 +33,6 @@ function Navbar() {
                 
                 <Suspense>
                     <SignedIn>
-                         <AdminLink />
                         <div className="size-8 self-center">
                             <UserButton appearance={{
                                 elements: {

@@ -2,6 +2,7 @@ import React, {ReactNode, Suspense} from "react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import {Badge} from "@/components/ui/badge";
+import { AdminMobileMenuButton } from "./AdminMobileMenuButton";
 
 export default function AdminLayout({
     children
@@ -15,28 +16,35 @@ export default function AdminLayout({
 }
 
 function Navbar() {
-    return <header className="flex h-12 shadow bg-background z-10">
+    return <header className="flex h-14 md:h-12 shadow bg-background z-10 sticky top-0">
         <div className="container">
-            <nav className="flex gap-4 h-full">
+            <nav className="flex gap-4 h-full items-center">
             <div className="mr-auto flex items-center gap-2">
                 <Link className="text-lg hover:underline" href="/">
                     Learning Lab
                 </Link>
                 <Badge>Admin</Badge>
             </div>
-            <Link
-                className="hover:bg-accent/10 flex items-center px-2 rounded-sm"
-                href="/admin/articles">
-                Articles
-            </Link>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex gap-4">
+                <Link
+                    className="hover:bg-accent/10 flex items-center px-2 rounded-sm"
+                    href="/admin/articles">
+                    Articles
+                </Link>
 
-            <div className="size-8 self-center">
-                <UserButton appearance={{
-                    elements: {
-                        userButtonAvatarBox: { width: "100%", height: "100%" }
-                    }
-                }}/>
+                <div className="size-8 self-center">
+                    <UserButton appearance={{
+                        elements: {
+                            userButtonAvatarBox: { width: "100%", height: "100%" }
+                        }
+                    }}/>
+                </div>
             </div>
+
+            {/* Mobile Menu */}
+            <AdminMobileMenuButton />
             </nav>
         </div>
     </header>

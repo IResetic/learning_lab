@@ -335,57 +335,66 @@ export function ArticleForm({
           </p>
         </div>
 
-        {/* Save Buttons */}
-        <div className="flex gap-3 mb-6">
-          <Button 
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isSaving || isPublishing || isUnpublishing || isDeleting}
-          >
-            Cancel
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={handleSave}
-            disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
-          >
-            {isSaving ? `${isEditing ? 'Updating' : 'Saving'}...` : saveButtonText}
-          </Button>
-          
-          {/* Show Publish button for draft or archived articles */}
-          {onPublish && (initialStatus === "draft" || initialStatus === "archived") && (
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mb-6">
+          {/* Primary Actions - Left Side */}
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button 
-              onClick={handlePublish}
-              disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
-              className="bg-primary hover:bg-primary/90"
-            >
-              {isPublishing ? "Publishing..." : "Publish"}
-            </Button>
-          )}
-          
-          {/* Show Unpublish button only if article is published */}
-          {onUnpublish && initialStatus === "published" && (
-            <Button 
-              onClick={handleUnpublish}
-              disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
-              variant="destructive"
-            >
-              {isUnpublishing ? "Unpublishing..." : "Unpublish"}
-            </Button>
-          )}
-          
-          {/* Show Delete button only when editing */}
-          {onDelete && isEditing && (
-            <Button 
-              onClick={handleDelete}
+              variant="outline"
+              onClick={handleCancel}
               disabled={isSaving || isPublishing || isUnpublishing || isDeleting}
-              variant="destructive"
-              className="ml-auto"
+              className="w-full sm:w-auto"
             >
-              {isDeleting ? "Deleting..." : "Delete Article"}
+              Cancel
             </Button>
-          )}
+            
+            <Button 
+              variant="outline"
+              onClick={handleSave}
+              disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
+              className="w-full sm:w-auto"
+            >
+              {isSaving ? `${isEditing ? 'Updating' : 'Saving'}...` : saveButtonText}
+            </Button>
+            
+            {/* Show Publish button for draft or archived articles */}
+            {onPublish && (initialStatus === "draft" || initialStatus === "archived") && (
+              <Button 
+                onClick={handlePublish}
+                disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
+                className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+              >
+                {isPublishing ? "Publishing..." : "Publish"}
+              </Button>
+            )}
+          </div>
+
+          {/* Destructive Actions - Right Side */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Show Unpublish button only if article is published */}
+            {onUnpublish && initialStatus === "published" && (
+              <Button 
+                onClick={handleUnpublish}
+                disabled={isSaving || isPublishing || isUnpublishing || isDeleting || !title.trim()}
+                variant="destructive"
+                className="w-full sm:w-auto"
+              >
+                {isUnpublishing ? "Unpublishing..." : "Unpublish"}
+              </Button>
+            )}
+            
+            {/* Show Delete button only when editing */}
+            {onDelete && isEditing && (
+              <Button 
+                onClick={handleDelete}
+                disabled={isSaving || isPublishing || isUnpublishing || isDeleting}
+                variant="destructive"
+                className="w-full sm:w-auto"
+              >
+                {isDeleting ? "Deleting..." : "Delete Article"}
+              </Button>
+            )}
+          </div>
         </div>
 
         <ArticleEditor 
