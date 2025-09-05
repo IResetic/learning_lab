@@ -154,10 +154,12 @@ export async function getArticles(options: GetArticlesOptions = {}): Promise<Pag
     }
 
     // Get total count for pagination
-    const [{ total }] = await db
+    const countResult = await db
         .select({ total: count() })
         .from(ArticleTable)
         .where(and(...conditions));
+    
+    const total = countResult[0]?.total ?? 0;
 
     // Get articles with pagination
     const articles = await db
